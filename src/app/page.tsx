@@ -1,174 +1,197 @@
 import { HeroSection } from "@/components/hero/HeroSection";
-import { PortfolioGrid } from "@/components/portfolio/PortfolioGrid";
-import { Button } from "@/components/ui/Button";
-import { SectionHeading } from "@/components/ui/SectionHeading";
+import { MagneticButton } from "@/components/motion/MagneticButton";
+import { ParallaxImage } from "@/components/motion/ParallaxImage";
+import { Reveal } from "@/components/motion/Reveal";
 import { TESTIMONIALS } from "@/lib/data/services";
 import { getCategoryList, getFeaturedImages } from "@/lib/google-drive/provider";
-import Image from "next/image";
 import Link from "next/link";
+import { CategoryHoverRail } from "@/components/portfolio/CategoryHoverRail";
+import { FeaturedWorkRow } from "@/components/portfolio/FeaturedWorkRow";
 
 export default async function HomePage() {
   const featuredImages = await getFeaturedImages(6);
   const categories = getCategoryList();
 
   return (
-    <div className="flex flex-col space-y-24 sm:space-y-36 pb-24">
-      {/* 1. Hero Section */}
+    <div className="flex flex-col">
+
+      {/* ── 1. Cinematic Hero ── */}
       <HeroSection />
 
-      {/* 2. Featured Works Showcase */}
-      <section
-        aria-label="Featured Photography"
-        className="max-w-7xl mx-auto px-6 sm:px-8 w-full"
-      >
-        <SectionHeading
-          badge="Curated Showcase"
-          title="Selected Editorial Works"
-          subtitle="A glimpse into recent destination unions, character studies, and couture visual essays."
-          action={
-            <Button href="/portfolio" variant="outline" size="sm">
-              Explore All Collections &rarr;
-            </Button>
-          }
-        />
-        <PortfolioGrid images={featuredImages} />
-      </section>
-
-      {/* 3. Category Explorer */}
-      <section
-        aria-label="Portfolio Categories"
-        className="max-w-7xl mx-auto px-6 sm:px-8 w-full"
-      >
-        <SectionHeading
-          badge="Disciplines"
-          title="The Collections"
-          subtitle="Explore our dedicated galleries spanning intimate unions, high-fashion editorials, and architectural space."
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {categories.map((cat, idx) => (
-            <Link
-              key={cat.id}
-              href={`/portfolio/${cat.slug}`}
-              className={`group relative overflow-hidden bg-surface border border-surface-border aspect-[4/5] flex flex-col justify-end p-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
-                idx === 0 ? "sm:col-span-2 lg:col-span-2 aspect-[16/9]" : ""
-              }`}
-            >
-              <Image
-                src={cat.coverImage}
-                alt={`${cat.name} collection cover`}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
-
-              <div className="relative z-10">
-                <span className="text-xs uppercase tracking-[0.25em] text-gold font-medium mb-2 block">
-                  Collection 0{cat.order}
-                </span>
-                <h3 className="font-serif text-2xl sm:text-3xl text-ivory font-normal tracking-tight group-hover:text-gold transition-colors duration-300">
-                  {cat.name}
-                </h3>
-                <p className="mt-2 text-xs sm:text-sm text-ivory-muted font-light line-clamp-2 max-w-md">
-                  {cat.description}
-                </p>
-                <div className="mt-4 flex items-center space-x-2 text-xs uppercase tracking-widest text-ivory group-hover:text-gold transition-colors">
-                  <span>View Gallery</span>
-                  <span>&rarr;</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Editorial Narrative / Philosophy Statement */}
-      <section
-        aria-label="Philosophy"
-        className="bg-surface border-y border-surface-border py-24 sm:py-32"
-      >
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 text-center space-y-8">
-          <span className="text-xs uppercase tracking-[0.3em] text-gold font-medium block">
-            Artistic Philosophy
-          </span>
-          <blockquote className="font-serif text-2xl sm:text-4xl lg:text-5xl text-ivory font-normal leading-[1.25]">
-            &ldquo;We do not manufacture moments. We listen to the light, honor the quiet gravity of human emotion, and sculpt heirlooms meant to outlive us.&rdquo;
-          </blockquote>
-          <p className="text-sm sm:text-base text-ivory-muted font-light leading-relaxed max-w-2xl mx-auto">
-            Founded on the principle that true luxury lies in authentic restraint. Every commission is treated with the precision of high-fashion editorial direction and the heart of documentary storytelling.
-          </p>
-          <div className="pt-4">
-            <Button href="/about" variant="primary" size="md">
-              Learn More About Our Philosophy
-            </Button>
+      {/* ── 2. Featured Work — editorial rhythm layout ── */}
+      <section aria-label="Featured Photography" className="pt-32 pb-24 overflow-hidden">
+        <Reveal className="max-w-screen-2xl mx-auto px-6 sm:px-10 mb-16 flex items-end justify-between gap-6">
+          <div>
+            <span className="text-[10px] uppercase tracking-[0.35em] text-gold block mb-3">
+              Selected Work
+            </span>
+            <h2 className="font-serif text-4xl sm:text-5xl text-ivory font-normal leading-tight">
+              Recent Stories
+            </h2>
           </div>
-        </div>
+          <Link
+            href="/portfolio"
+            className="hidden sm:inline-flex text-[10px] uppercase tracking-[0.25em] text-ivory-muted hover:text-gold transition-colors shrink-0"
+            data-cursor="view"
+          >
+            All Work &rarr;
+          </Link>
+        </Reveal>
+
+        <FeaturedWorkRow images={featuredImages} />
       </section>
 
-      {/* 5. Client Testimonials & Social Proof */}
-      <section
-        aria-label="Client Praise"
-        className="max-w-7xl mx-auto px-6 sm:px-8 w-full"
-      >
-        <SectionHeading
-          badge="Words of Gratitude"
-          title="Client Reflections"
-          subtitle="Read honest reflections from couples, creative directors, and families we have had the honor of documenting."
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {TESTIMONIALS.slice(0, 2).map((test) => (
-            <div
-              key={test.id}
-              className="p-8 sm:p-12 bg-surface border border-surface-border flex flex-col justify-between space-y-8"
-            >
-              <blockquote className="font-serif text-lg sm:text-xl text-ivory font-light italic leading-relaxed">
-                &ldquo;{test.quote}&rdquo;
-              </blockquote>
-              <div className="border-t border-surface-border pt-6 flex items-center justify-between">
-                <div>
-                  <span className="font-serif text-base text-ivory block font-normal">
-                    {test.client}
-                  </span>
-                  <span className="text-xs text-ivory-dim font-light">
-                    {test.roleOrEvent} &bull; {test.location}
-                  </span>
-                </div>
-                <span className="text-xs uppercase tracking-widest text-gold font-mono">
-                  {test.year}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 6. Conversion CTA Section */}
-      <section
-        aria-label="Ready to Commission"
-        className="max-w-7xl mx-auto px-6 sm:px-8 w-full"
-      >
-        <div className="p-10 sm:p-16 lg:p-20 bg-gradient-to-b from-surface-elevated to-surface border border-gold/20 flex flex-col items-center text-center space-y-6">
-          <span className="text-xs uppercase tracking-[0.3em] text-gold font-medium">
-            2026 &bull; 2027 Commission Bookings
+      {/* ── 3. Category Hover Rail ── */}
+      <section aria-label="Photography Collections" className="py-24 bg-surface border-y border-surface-border overflow-hidden">
+        <Reveal className="max-w-screen-2xl mx-auto px-6 sm:px-10 mb-16">
+          <span className="text-[10px] uppercase tracking-[0.35em] text-gold block mb-3">
+            Disciplines
           </span>
-          <h2 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-ivory max-w-2xl font-normal leading-tight">
-            Reserve your date with the atelier.
+          <h2 className="font-serif text-4xl sm:text-5xl text-ivory font-normal">
+            The Collections
           </h2>
-          <p className="text-sm sm:text-base text-ivory-muted font-light max-w-xl leading-relaxed">
-            To maintain our standard of uncompromised personal dedication, we accept a limited number of destination weddings and editorial commissions each year.
-          </p>
-          <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
-            <Button href="/contact" variant="gold" size="lg">
-              Inquire For Availability
-            </Button>
-            <Button href="/services" variant="outline" size="lg">
-              Explore Our Services
-            </Button>
+        </Reveal>
+        <CategoryHoverRail categories={categories} />
+      </section>
+
+      {/* ── 4. Philosophy — full-bleed image with overlaid text ── */}
+      <section aria-label="Philosophy" className="relative h-[70vh] min-h-[500px] overflow-hidden flex items-center">
+        <ParallaxImage
+          src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2000&auto=format&fit=crop"
+          alt="Cinematic wedding moment"
+          speed={0.12}
+          wrapperClassName="absolute inset-0"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/60 to-background/20" />
+
+        <div className="relative z-10 max-w-screen-2xl mx-auto px-6 sm:px-10 w-full">
+          <Reveal delay={0.1}>
+            <span className="text-[10px] uppercase tracking-[0.35em] text-gold block mb-6">
+              My Approach
+            </span>
+          </Reveal>
+          <Reveal delay={0.25}>
+            <blockquote className="font-serif text-[clamp(1.6rem,4vw,3.5rem)] text-ivory font-normal leading-[1.15] max-w-2xl">
+              &ldquo;I don&rsquo;t direct your emotions —<br />
+              I simply wait for them,<br />
+              and then I&rsquo;m there.&rdquo;
+            </blockquote>
+          </Reveal>
+          <Reveal delay={0.4} className="mt-10">
+            <MagneticButton>
+              <Link
+                href="/about"
+                className="inline-flex text-[10px] uppercase tracking-[0.25em] border border-ivory/30 text-ivory px-7 py-3.5 hover:border-gold hover:text-gold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              >
+                My Story
+              </Link>
+            </MagneticButton>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── 5. Process ── */}
+      <section aria-label="How We Work" className="py-28 max-w-screen-2xl mx-auto px-6 sm:px-10 w-full">
+        <Reveal className="mb-20">
+          <span className="text-[10px] uppercase tracking-[0.35em] text-gold block mb-3">
+            A Seamless Journey
+          </span>
+          <h2 className="font-serif text-4xl sm:text-5xl text-ivory font-normal">
+            How We Work Together
+          </h2>
+        </Reveal>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-surface-border">
+          {[
+            { n: "01", title: "Connect", body: "We meet over coffee or video to understand your day, your emotions, and what you want to remember." },
+            { n: "02", title: "Prepare", body: "I study your venue's light, map the timeline, and coordinate quietly so nothing is left to chance." },
+            { n: "03", title: "Capture", body: "On the day I'm invisible — present enough to catch everything, unobtrusive enough for you to forget I'm there." },
+            { n: "04", title: "Deliver", body: "Your gallery arrives within 6–8 weeks. Every image individually edited, yours to keep forever." },
+          ].map((step, i) => (
+            <Reveal key={step.n} delay={i * 0.1} className="bg-background p-10 lg:p-12">
+              <span className="text-gold font-mono text-[11px] tracking-widest block mb-6">{step.n}</span>
+              <h3 className="font-serif text-2xl text-ivory mb-4 font-normal">{step.title}</h3>
+              <p className="text-sm text-ivory-muted font-light leading-relaxed">{step.body}</p>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 6. Testimonials — cinematic dark cards ── */}
+      <section aria-label="Client Testimonials" className="py-28 bg-surface border-y border-surface-border">
+        <div className="max-w-screen-2xl mx-auto px-6 sm:px-10">
+          <Reveal className="mb-20">
+            <span className="text-[10px] uppercase tracking-[0.35em] text-gold block mb-3">
+              Kind Words
+            </span>
+            <h2 className="font-serif text-4xl sm:text-5xl text-ivory font-normal">
+              What Couples Say
+            </h2>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-surface-border">
+            {TESTIMONIALS.slice(0, 2).map((t, i) => (
+              <Reveal key={t.id} delay={i * 0.15} className="bg-background p-10 sm:p-14 flex flex-col justify-between gap-10">
+                <div className="flex gap-0.5" aria-label="5 stars">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <span key={s} className="text-gold text-sm">★</span>
+                  ))}
+                </div>
+                <blockquote className="font-serif text-xl sm:text-2xl text-ivory font-normal leading-relaxed italic flex-1">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <div className="flex items-end justify-between border-t border-surface-border pt-6">
+                  <div>
+                    <span className="font-serif text-base text-ivory block">{t.client}</span>
+                    <span className="text-xs text-ivory-dim mt-0.5 block">{t.roleOrEvent} · {t.location}</span>
+                  </div>
+                  <span className="font-mono text-xs text-gold tracking-widest">{t.year}</span>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
+
+      {/* ── 7. Booking CTA — full-bleed image ── */}
+      <section aria-label="Book a Session" className="relative h-[60vh] min-h-[440px] flex items-center justify-center overflow-hidden">
+        <ParallaxImage
+          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=2000&auto=format&fit=crop"
+          alt="Portrait photography"
+          speed={0.1}
+          wrapperClassName="absolute inset-0"
+        />
+        <div className="absolute inset-0 bg-background/75" />
+
+        <Reveal className="relative z-10 text-center px-6 max-w-2xl mx-auto">
+          <span className="text-[10px] uppercase tracking-[0.35em] text-gold block mb-5">
+            Limited Dates · 2026 &amp; 2027
+          </span>
+          <h2 className="font-serif text-[clamp(2rem,5vw,4.5rem)] text-ivory font-normal leading-tight mb-8">
+            Let&rsquo;s capture your story together.
+          </h2>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <MagneticButton>
+              <Link
+                href="/contact"
+                data-cursor="open"
+                className="inline-flex text-[11px] uppercase tracking-[0.25em] bg-gold text-background px-8 py-4 hover:bg-gold-hover transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                Check Availability
+              </Link>
+            </MagneticButton>
+            <MagneticButton>
+              <Link
+                href="/services"
+                className="inline-flex text-[11px] uppercase tracking-[0.25em] border border-ivory/30 text-ivory px-8 py-4 hover:border-gold hover:text-gold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              >
+                See Packages
+              </Link>
+            </MagneticButton>
+          </div>
+        </Reveal>
+      </section>
+
     </div>
   );
 }

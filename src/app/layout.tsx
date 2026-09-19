@@ -1,6 +1,7 @@
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { SkipLink } from "@/components/layout/SkipLink";
+import { CustomCursor } from "@/components/motion/CustomCursor";
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
@@ -77,8 +78,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${cinzel.variable} ${plusJakarta.variable}`}>
-      <body className="bg-background text-ivory antialiased selection:bg-gold selection:text-background flex flex-col min-h-screen">
+      <body suppressHydrationWarning className="bg-background text-ivory antialiased selection:bg-gold selection:text-background flex flex-col min-h-screen">
         <SkipLink />
+        <CustomCursor />
         <Header />
         <main id="main-content" className="flex-1 focus:outline-none">
           {children}

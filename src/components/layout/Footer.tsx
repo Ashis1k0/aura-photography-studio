@@ -1,11 +1,11 @@
 import Link from "next/link";
-import React from "react";
-import { Button } from "../ui/Button";
+import { MagneticButton } from "@/components/motion/MagneticButton";
+import { Reveal } from "@/components/motion/Reveal";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const year = new Date().getFullYear();
 
-  const categories = [
+  const collections = [
     { label: "Wedding", href: "/portfolio/wedding" },
     { label: "Pre-Wedding", href: "/portfolio/pre-wedding" },
     { label: "Portrait", href: "/portfolio/portrait" },
@@ -15,61 +15,62 @@ export function Footer() {
     { label: "Commercial", href: "/portfolio/commercial" },
   ];
 
-  const quickLinks = [
+  const nav = [
     { label: "Portfolio", href: "/portfolio" },
-    { label: "About the Artist", href: "/about" },
-    { label: "Services & Process", href: "/services" },
-    { label: "Journal & Stories", href: "/journal" },
-    { label: "Book a Session", href: "/contact" },
+    { label: "About", href: "/about" },
+    { label: "Services", href: "/services" },
+    { label: "Contact", href: "/contact" },
   ];
 
   return (
-    <footer className="bg-surface border-t border-surface-border pt-20 pb-12 text-ivory-muted">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        {/* Top Editorial Banner */}
-        <div className="pb-16 border-b border-surface-border flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-          <div className="max-w-xl">
-            <span className="text-xs uppercase tracking-[0.25em] text-gold font-medium mb-3 block">
-              Commissions & Inquiries
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-ivory font-normal leading-tight">
-              Let’s create something unforgettable together.
-            </h2>
-          </div>
-          <div className="shrink-0">
-            <Button href="/contact" variant="gold" size="lg">
-              Start a Project
-            </Button>
-          </div>
-        </div>
+    <footer className="bg-surface border-t border-surface-border" aria-label="Site footer">
+      <div className="max-w-screen-2xl mx-auto px-6 sm:px-10">
 
-        {/* Links Grid */}
-        <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Col 1: Identity */}
-          <div className="space-y-4">
-            <span className="font-serif text-xl tracking-[0.2em] text-ivory uppercase block">
+        {/* Large editorial CTA */}
+        <Reveal className="py-20 sm:py-28 border-b border-surface-border flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+          <div>
+            <span className="text-[10px] uppercase tracking-[0.35em] text-gold block mb-5">
+              Now Booking 2026 &amp; 2027
+            </span>
+            <p className="font-serif text-[clamp(2rem,5vw,4.5rem)] text-ivory font-normal leading-[0.95] max-w-2xl">
+              Let&rsquo;s create something beautiful.
+            </p>
+          </div>
+          <MagneticButton>
+            <Link
+              href="/contact"
+              data-cursor="open"
+              className="inline-flex text-[11px] uppercase tracking-[0.25em] bg-gold text-background px-10 py-4 hover:bg-gold-hover transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap shrink-0"
+            >
+              Start a Project
+            </Link>
+          </MagneticButton>
+        </Reveal>
+
+        {/* Links row */}
+        <div className="py-16 grid grid-cols-2 md:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1 space-y-4">
+            <span className="font-serif text-base tracking-[0.2em] text-ivory uppercase block">
               Aura Atelier
             </span>
-            <p className="text-sm leading-relaxed text-ivory-dim font-light">
-              Fine art & editorial photography dedicated to capturing light, human devotion, and timeless stories across the globe.
+            <p className="text-xs text-ivory-dim font-light leading-relaxed max-w-xs">
+              Wedding &amp; portrait photographer based in Mumbai, traveling worldwide to document love beautifully.
             </p>
-            <div className="pt-2 text-xs uppercase tracking-widest text-gold">
-              Available Worldwide
-            </div>
+            <span className="text-[9px] uppercase tracking-widest text-gold/60 block">
+              Est. 2013 · Available Worldwide
+            </span>
           </div>
 
-          {/* Col 2: Categories */}
+          {/* Collections */}
           <div>
-            <h3 className="text-xs uppercase tracking-[0.2em] text-ivory font-medium mb-6">
-              Portfolio Collections
+            <h3 className="text-[9px] uppercase tracking-[0.25em] text-ivory font-medium mb-5">
+              Collections
             </h3>
-            <ul className="space-y-3 text-sm">
-              {categories.map((c) => (
+            <ul className="space-y-3">
+              {collections.map((c) => (
                 <li key={c.href}>
-                  <Link
-                    href={c.href}
-                    className="hover:text-gold transition-colors duration-200 block"
-                  >
+                  <Link href={c.href} className="text-xs text-ivory-muted hover:text-gold transition-colors duration-200">
                     {c.label}
                   </Link>
                 </li>
@@ -77,18 +78,15 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 3: Navigation */}
+          {/* Nav */}
           <div>
-            <h3 className="text-xs uppercase tracking-[0.2em] text-ivory font-medium mb-6">
-              Navigation
+            <h3 className="text-[9px] uppercase tracking-[0.25em] text-ivory font-medium mb-5">
+              Navigate
             </h3>
-            <ul className="space-y-3 text-sm">
-              {quickLinks.map((l) => (
+            <ul className="space-y-3">
+              {nav.map((l) => (
                 <li key={l.href}>
-                  <Link
-                    href={l.href}
-                    className="hover:text-gold transition-colors duration-200 block"
-                  >
+                  <Link href={l.href} className="text-xs text-ivory-muted hover:text-gold transition-colors duration-200">
                     {l.label}
                   </Link>
                 </li>
@@ -96,67 +94,35 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 4: Studio Connect */}
+          {/* Contact */}
           <div>
-            <h3 className="text-xs uppercase tracking-[0.2em] text-ivory font-medium mb-6">
-              Studio Connect
+            <h3 className="text-[9px] uppercase tracking-[0.25em] text-ivory font-medium mb-5">
+              Say Hello
             </h3>
-            <div className="space-y-4 text-sm font-light">
-              <p>
-                <span className="block text-xs uppercase tracking-wider text-ivory-dim">Location</span>
-                Mumbai &bull; Paris &bull; Worldwide
-              </p>
-              <p>
-                <span className="block text-xs uppercase tracking-wider text-ivory-dim">Inquiries</span>
-                <a
-                  href="mailto:inquiries@aura-atelier.com"
-                  className="hover:text-gold transition-colors"
-                >
-                  inquiries@aura-atelier.com
-                </a>
-              </p>
-              <div className="pt-2 flex items-center space-x-4 text-xs tracking-wider uppercase">
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-gold transition-colors"
-                >
+            <div className="space-y-3 text-xs text-ivory-muted font-light">
+              <p>Mumbai &bull; Paris &bull; Worldwide</p>
+              <a href="mailto:hello@aura-atelier.com" className="hover:text-gold transition-colors block">
+                hello@aura-atelier.com
+              </a>
+              {/* Social */}
+              <div className="flex gap-4 pt-2 text-[9px] uppercase tracking-widest">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors" aria-label="Instagram">
                   Instagram
                 </a>
-                <span>&bull;</span>
-                <a
-                  href="https://pinterest.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-gold transition-colors"
-                >
+                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors" aria-label="Pinterest">
                   Pinterest
-                </a>
-                <span>&bull;</span>
-                <a
-                  href="https://vimeo.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-gold transition-colors"
-                >
-                  Vimeo
                 </a>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar: Legal & Copyright */}
-        <div className="pt-8 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between text-xs text-ivory-dim gap-4">
-          <p>&copy; {currentYear} Aura Atelier. All photographs reserved.</p>
-          <div className="flex items-center space-x-6">
-            <Link href="/privacy" className="hover:text-ivory transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-ivory transition-colors">
-              Terms of Service
-            </Link>
+        {/* Bottom bar */}
+        <div className="py-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] text-ivory-dim">
+          <p>&copy; {year} Aura Atelier. All photographs reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="hover:text-ivory transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-ivory transition-colors">Terms</Link>
           </div>
         </div>
       </div>

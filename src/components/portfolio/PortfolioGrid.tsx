@@ -1,13 +1,25 @@
 "use client";
 
 import { PortfolioImage } from "@/types";
-import React, { useState } from "react";
+import { motion, useInView } from "framer-motion";
+import React, { useRef, useState } from "react";
 import { ImageLightbox } from "./ImageLightbox";
 import { PortfolioCard } from "./PortfolioCard";
+import { Reveal } from "@/components/motion/Reveal";
 
 interface PortfolioGridProps {
   images: PortfolioImage[];
   emptyMessage?: string;
+}
+
+// Rhythm pattern: true = full-width spanning item, false = single col
+// Pattern repeats every 7 images: [wide, normal, normal, wide, normal, normal, normal]
+function getLayout(idx: number): { colSpan: string; aspect: "landscape" | "portrait" | "square" | "natural" } {
+  const pos = idx % 7;
+  if (pos === 0) return { colSpan: "md:col-span-2", aspect: "landscape" };
+  if (pos === 3) return { colSpan: "md:col-span-2", aspect: "landscape" };
+  if (pos === 2 || pos === 5) return { colSpan: "col-span-1", aspect: "portrait" };
+  return { colSpan: "col-span-1", aspect: "natural" };
 }
 
 export function PortfolioGrid({
@@ -17,52 +29,37 @@ export function PortfolioGrid({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [triggerRef, setTriggerRef] = useState<React.RefObject<HTMLButtonElement | null> | undefined>();
 
-  const handleOpenLightbox = (
-    index: number,
-    buttonRef: React.RefObject<HTMLButtonElement | null>
-  ) => {
+  const handleOpen = (index: number, ref: React.RefObject<HTMLButtonElement | null>) => {
     setLightboxIndex(index);
-    setTriggerRef(buttonRef);
-  };
-
-  const handleCloseLightbox = () => {
-    setLightboxIndex(null);
+    setTriggerRef(ref);
   };
 
   if (images.length === 0) {
     return (
-      <div className="py-24 text-center border border-surface-border bg-surface p-8 max-w-xl mx-auto my-12">
-        <span className="text-xs uppercase tracking-[0.25em] text-gold block mb-3">
-          Collection Notice
+      <Reveal className="py-24 text-center max-w-lg mx-auto">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-gold block mb-3">
+          Coming Soon
         </span>
-        <p className="text-lg text-ivory font-serif">{emptyMessage}</p>
-        <p className="text-xs text-ivory-dim mt-2 font-light">
-          Please check back shortly or explore our other collections.
-        </p>
-      </div>
+        <p className="font-serif text-xl text-ivory">{emptyMessage}</p>
+      </Reveal>
     );
   }
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-surface-border">
         {images.map((image, idx) => {
-          // Asymmetric editorial rhythm: every 5th image is a portrait aspect
-          const aspect = idx % 5 === 0 ? "portrait" : idx % 3 === 0 ? "square" : "natural";
-
+          const { colSpan, aspect } = getLayout(idx);
           return (
-            <div
-              key={image.id}
-              className={idx % 7 === 0 ? "md:col-span-2 lg:col-span-2" : ""}
-            >
+            <GridItem key={image.id} colSpan={colSpan} idx={idx}>
               <PortfolioCard
                 image={image}
                 index={idx}
-                aspect={idx % 7 === 0 ? "landscape" : aspect}
+                aspect={aspect}
                 priority={idx < 4}
-                onOpenLightbox={handleOpenLightbox}
+                onOpenLightbox={handleOpen}
               />
-            </div>
+            </GridItem>
           );
         })}
       </div>
@@ -72,11 +69,36 @@ export function PortfolioGrid({
           images={images}
           currentIndex={lightboxIndex}
           isOpen={lightboxIndex !== null}
-          onClose={handleCloseLightbox}
-          onNavigate={(newIdx) => setLightboxIndex(newIdx)}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
           triggerElementRef={triggerRef}
         />
       )}
     </>
+  );
+}
+
+function GridItem({
+  children,
+  colSpan,
+  idx,
+}: {
+  children: React.ReactNode;
+  colSpan: string;
+  idx: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref as React.RefObject<Element>, { once: true, amount: 0.1 });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0 }}
+      animate={isInView ? { opacity: 1 } : {}}
+      transition={{ duration: 0.6, delay: (idx % 3) * 0.08 }}
+      className={`bg-background ${colSpan}`}
+    >
+      {children}
+    </motion.div>
   );
 }
