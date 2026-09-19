@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { SceneFallback } from "./SceneFallback";
 
 interface FrameData {
   mesh: THREE.Mesh;
@@ -11,37 +12,73 @@ interface FrameData {
   speed: number;
 }
 
-export function FloatingGalleryCanvas() {
+interface FloatingGalleryCanvasProps {
+  onFallback?: () => void;
+}
+
+export function FloatingGalleryCanvas({ onFallback }: FloatingGalleryCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
+    // 1. Verify WebGL support using a temporary probe canvas
+    //    (Do NOT probe on the main canvas — that would consume the context slot
+    //     before Three.js can acquire it, causing a second null-context crash.)
+    try {
+      const probe = document.createElement("canvas");
+      const gl =
+        probe.getContext("webgl2") ||
+        probe.getContext("webgl") ||
+        (probe.getContext("experimental-webgl") as WebGLRenderingContext | null);
+      if (!gl) {
+        setHasError(true);
+        onFallback?.();
+        return;
+      }
+      // Release the probe context immediately
+      const ext = gl.getExtension("WEBGL_lose_context");
+      if (ext) ext.loseContext();
+    } catch {
+      setHasError(true);
+      onFallback?.();
+      return;
+    }
+
     let animFrameId: number;
     let isDisposed = false;
+    let renderer: THREE.WebGLRenderer;
 
-    // 1. Scene & Camera
-    const scene = new THREE.Scene();
     const width = container.clientWidth || 600;
     const height = container.clientHeight || 500;
 
+    // 2. Initialize WebGLRenderer safely inside try/catch
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: "default",
+      });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    } catch (err) {
+      console.warn("[Three.js] WebGL renderer instantiation failed, using static fallback:", err);
+      setHasError(true);
+      onFallback?.();
+      return;
+    }
+
+    // 3. Scene & Camera
+    const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.set(0, 0, 4.2);
 
-    // 2. Renderer
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: "default",
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
-    // 3. Lighting
+    // 4. Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
 
@@ -49,7 +86,7 @@ export function FloatingGalleryCanvas() {
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
 
-    // 4. Frames Setup
+    // 5. Frames Setup
     const textureLoader = new THREE.TextureLoader();
     const frameConfigs = [
       {
@@ -124,7 +161,7 @@ export function FloatingGalleryCanvas() {
       });
     });
 
-    // 5. Pointer Tracking with Smooth Lerp
+    // 6. Pointer Tracking with Smooth Lerp
     let targetPointerX = 0;
     let targetPointerY = 0;
     let currentPointerX = 0;
@@ -140,7 +177,7 @@ export function FloatingGalleryCanvas() {
 
     window.addEventListener("mousemove", handlePointerMove, { passive: true });
 
-    // 6. Resize Handling
+    // 7. Resize Handling
     const handleResize = () => {
       if (!container || !renderer || !camera) return;
       const w = container.clientWidth || 600;
@@ -152,7 +189,7 @@ export function FloatingGalleryCanvas() {
 
     window.addEventListener("resize", handleResize);
 
-    // 7. Animation Loop
+    // 8. Animation Loop
     const clock = new THREE.Clock();
 
     const animate = () => {
@@ -184,16 +221,24 @@ export function FloatingGalleryCanvas() {
         frame.border.rotation.x = rotX;
       });
 
-      renderer.render(scene, camera);
-      animFrameId = requestAnimationFrame(animate);
+      try {
+        renderer.render(scene, camera);
+        animFrameId = requestAnimationFrame(animate);
+      } catch (err) {
+        console.warn("[Three.js] Render error, switching to fallback:", err);
+        setHasError(true);
+        onFallback?.();
+      }
     };
 
     animate();
 
-    // 8. Complete Resource Cleanup on Unmount (Zero Memory Leaks)
+    // 9. Resource Cleanup (safe for React Strict Mode)
     return () => {
       isDisposed = true;
-      cancelAnimationFrame(animFrameId);
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+      }
       window.removeEventListener("mousemove", handlePointerMove);
       window.removeEventListener("resize", handleResize);
 
@@ -206,10 +251,15 @@ export function FloatingGalleryCanvas() {
       materialsToDispose.forEach((m) => m.dispose());
       texturesToDispose.forEach((t) => t.dispose());
 
-      renderer.dispose();
-      renderer.forceContextLoss();
+      if (renderer) {
+        renderer.dispose();
+      }
     };
-  }, []);
+  }, [onFallback]);
+
+  if (hasError) {
+    return <SceneFallback />;
+  }
 
   return (
     <div
