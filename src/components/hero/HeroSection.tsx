@@ -128,7 +128,7 @@ export function HeroSection() {
       </motion.div>
 
       {/* ── Main copy — bottom-left ── */}
-      <div className="relative z-20 w-full pb-16 md:pb-20 px-6 sm:px-10 max-w-screen-2xl mx-auto">
+      <div className="relative z-20 w-full pt-24 pb-16 md:pb-20 px-6 sm:px-10 max-w-screen-2xl mx-auto">
 
         {/* Eyebrow — appears early in sequence */}
         <motion.div

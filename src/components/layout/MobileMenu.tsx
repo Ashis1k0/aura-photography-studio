@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useRef } from "react";
-import { Button } from "../ui/Button";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -16,49 +15,37 @@ export function MobileMenu({ isOpen, onClose, navItems }: MobileMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Close on route change
+  // Close when route changes
   useEffect(() => {
     onClose();
-  }, [pathname, onClose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
-  // Handle escape key and focus trap
   useEffect(() => {
     if (!isOpen) return;
 
-    // Body scroll lock
-    const originalOverflow = document.body.style.overflow;
+    // Lock body scroll
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
-    // Focus close button initially
     closeButtonRef.current?.focus();
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
-
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onClose(); return; }
       if (e.key === "Tab" && menuRef.current) {
-        const focusableElements = menuRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        const els = menuRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], [tabindex]:not([tabindex="-1"])'
         );
-        const first = focusableElements[0];
-        const last = focusableElements[focusableElements.length - 1];
-
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last?.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first?.focus();
-        }
+        const first = els[0];
+        const last = els[els.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = originalOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
     };
   }, [isOpen, onClose]);
 
@@ -70,29 +57,33 @@ export function MobileMenu({ isOpen, onClose, navItems }: MobileMenuProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Navigation menu"
-      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col justify-between p-6 sm:p-12 animate-fade-in"
+      className="fixed inset-0 z-50 flex flex-col bg-background"
+      style={{ WebkitOverflowScrolling: "touch" }}
     >
-      {/* Header bar */}
-      <div className="flex items-center justify-between">
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-5 py-5 border-b border-surface-border shrink-0">
         <Link
           href="/"
           onClick={onClose}
-          className="font-serif text-xl tracking-[0.2em] text-ivory uppercase"
+          className="font-serif text-base tracking-[0.25em] text-ivory uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded"
+          aria-label="Aura Atelier — Home"
         >
           Aura Atelier
         </Link>
+
+        {/* Close button — large tap target */}
         <button
           ref={closeButtonRef}
           onClick={onClose}
           aria-label="Close menu"
-          className="p-3 text-ivory-muted hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded transition-colors"
+          className="flex items-center justify-center w-10 h-10 text-ivory-muted hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded transition-colors"
         >
           <svg
-            className="w-6 h-6"
+            className="w-5 h-5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth="1.5"
+            strokeWidth="2"
             aria-hidden="true"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -100,24 +91,26 @@ export function MobileMenu({ isOpen, onClose, navItems }: MobileMenuProps) {
         </button>
       </div>
 
-      {/* Nav Links */}
-      <nav className="my-auto py-8">
-        <ul className="flex flex-col space-y-6">
+      {/* Nav links — vertically centred, full height */}
+      <nav className="flex-1 flex flex-col justify-center px-8 overflow-y-auto" aria-label="Mobile Navigation">
+        <ul className="flex flex-col gap-2">
           {navItems.map((item, index) => {
-            const isActive = pathname === item.href;
+            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   onClick={onClose}
-                  className={`group flex items-baseline gap-4 text-3xl sm:text-5xl font-serif tracking-tight transition-colors duration-200 ${
-                    isActive ? "text-gold" : "text-ivory hover:text-gold"
+                  className={`flex items-baseline gap-4 py-4 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded ${
+                    active ? "text-gold" : "text-ivory hover:text-gold"
                   }`}
                 >
-                  <span className="text-xs font-sans tracking-widest text-ivory-dim font-mono">
-                    0{index + 1}
+                  <span className="text-[10px] font-mono tracking-widest text-ivory-dim w-5 shrink-0">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span>{item.label}</span>
+                  <span className="font-serif text-4xl xs:text-5xl font-normal leading-none">
+                    {item.label}
+                  </span>
                 </Link>
               </li>
             );
@@ -125,25 +118,21 @@ export function MobileMenu({ isOpen, onClose, navItems }: MobileMenuProps) {
         </ul>
       </nav>
 
-      {/* Footer CTA & Contact Info */}
-      <div className="pt-6 border-t border-surface-border flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      {/* Bottom strip */}
+      <div className="shrink-0 px-8 py-6 border-t border-surface-border flex flex-col xs:flex-row xs:items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-gold font-medium mb-1">
-            Studio Inquiries
+          <p className="text-[10px] uppercase tracking-[0.25em] text-gold font-medium mb-0.5">
+            Now Booking 2026 &amp; 2027
           </p>
-          <p className="text-sm text-ivory-muted font-light">
-            Worldwide Commissions & Editorial Sessions
-          </p>
+          <p className="text-xs text-ivory-muted font-light">Worldwide Commissions</p>
         </div>
-        <Button
+        <Link
           href="/contact"
-          variant="gold"
-          size="md"
           onClick={onClose}
-          className="w-full sm:w-auto"
+          className="inline-flex items-center justify-center text-[11px] uppercase tracking-[0.25em] bg-gold text-background px-7 py-3.5 hover:bg-gold-hover transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold shrink-0"
         >
           Start a Project
-        </Button>
+        </Link>
       </div>
     </div>
   );
